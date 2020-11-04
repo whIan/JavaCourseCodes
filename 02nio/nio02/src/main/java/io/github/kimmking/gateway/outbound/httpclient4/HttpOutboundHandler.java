@@ -1,6 +1,7 @@
 package io.github.kimmking.gateway.outbound.httpclient4;
 
 
+import io.github.kimmking.gateway.filter.HeaderFilter;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,6 +18,7 @@ import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import java.util.Map;
 import java.util.concurrent.*;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
@@ -63,6 +65,10 @@ public class HttpOutboundHandler {
         final HttpGet httpGet = new HttpGet(url);
         //httpGet.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_CLOSE);
         httpGet.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
+        for(Map.Entry<String, String> e : inbound.headers().entries()){
+            System.out.println(e.getKey() + " => " + e.getValue());
+            httpGet.setHeader(e.getKey(), e.getValue());
+        }
         httpclient.execute(httpGet, new FutureCallback<HttpResponse>() {
             @Override
             public void completed(final HttpResponse endpointResponse) {
